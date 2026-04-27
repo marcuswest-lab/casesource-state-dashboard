@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Source State Performance Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0C0F14;color:#E2E8F0;font-family:'DM Sans',sans-serif;padding:24px 24px 48px}
+.container{max-width:1400px;margin:0 auto}
+.header{text-align:center;margin-bottom:24px}
+h1{font-size:28px;font-weight:700;color:#F8FAFC;margin-bottom:6px}
+.subtitle{color:#94A3B8;font-size:14px}
+h2{font-size:16px;font-weight:600;color:#CBD5E1;margin:24px 0 12px;text-transform:uppercase;letter-spacing:.6px}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:8px}
+.kpi-card{background:#151922;border:1px solid #1E293B;border-radius:10px;padding:16px 18px}
+.kpi-label{color:#94A3B8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.kpi-value{font-size:22px;font-weight:700;color:#F8FAFC;font-family:'JetBrains Mono',monospace}
+.kpi-sub{color:#64748B;font-size:11px;margin-top:4px;font-family:'JetBrains Mono',monospace}
+
+.legend{display:flex;justify-content:flex-end;gap:18px;font-size:11px;color:#94A3B8;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.legend-item{display:inline-flex;align-items:center;gap:5px}
+.legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+
+.panel{background:#0F1319;border:1px solid #1E293B;border-radius:10px;overflow:hidden}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#151922;color:#94A3B8;font-weight:600;padding:11px 16px;text-align:left;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:2px solid #1E293B;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+th:hover{color:#CBD5E1}
+th .arrow{font-size:9px;margin-left:3px;opacity:.3}
+th.sorted .arrow{opacity:1;color:#3B82F6}
+td{padding:11px 16px;border-bottom:1px solid #1E293B;white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:13px}
+tr:hover td{background:#1a1f2e}
+td.state-cell{font-family:'DM Sans',sans-serif;font-weight:500;color:#F1F5F9}
+td.r{text-align:right}
+.badge{display:inline-block;padding:3px 10px;border-radius:5px;font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.bg-good{background:rgba(52,211,153,.15);color:#34D399}
+.bg-mid{background:rgba(251,191,36,.15);color:#FBBF24}
+.bg-bad{background:rgba(248,113,113,.15);color:#F87171}
+.bg-na{color:#475569}
+
+.bar-cell{position:relative;min-width:140px}
+.bar-bg{position:absolute;left:16px;right:16px;top:50%;transform:translateY(-50%);height:6px;background:#1E293B;border-radius:3px;overflow:hidden;z-index:0}
+.bar-fg{height:100%;background:linear-gradient(90deg,#3B82F6,#60A5FA);border-radius:3px}
+.bar-val{position:relative;z-index:1;display:inline-block;background:#0F1319;padding:0 6px;border-radius:3px}
+
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:8px}
+.chart-card{background:#151922;border:1px solid #1E293B;border-radius:10px;padding:16px 18px}
+.chart-title{font-size:12px;color:#94A3B8;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.hbar-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;font-size:12px}
+.hbar-label{width:130px;color:#CBD5E1;font-family:'DM Sans',sans-serif;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar-track{flex:1;height:18px;background:#0C0F14;border-radius:4px;overflow:hidden;position:relative}
+.hbar-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;color:#0C0F14;font-weight:700;font-family:'JetBrains Mono',monospace;font-size:11px;min-width:28px}
+.fill-spend{background:linear-gradient(90deg,#3B82F6,#60A5FA)}
+.fill-leads{background:linear-gradient(90deg,#A78BFA,#C4B5FD)}
+.fill-cases{background:linear-gradient(90deg,#34D399,#6EE7B7)}
+.hbar-val-out{font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;width:80px;text-align:right;flex-shrink:0}
+
+.note{color:#64748B;font-size:11px;margin-top:10px;padding:0 4px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Case Source — State Performance Dashboard</h1>
+    <p class="subtitle">Spend, Leads, CPL, Signed Cases & CPA by State</p>
+  </div>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <h2>Performance by State</h2>
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:#34D399"></span>On target</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#FBBF24"></span>Acceptable</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#F87171"></span>Off target</span>
+    <span class="legend-item" style="margin-left:14px;color:#64748B">CPL: ≤$100 / ≤$120 &nbsp;·&nbsp; CPA: ≤$1,800 / ≤$2,500</span>
+  </div>
+  <div class="panel">
+    <div class="table-wrap">
+      <table id="stateTable">
+        <thead>
+          <tr>
+            <th data-sort="state">State <span class="arrow">▼</span></th>
+            <th class="r" data-sort="spend">Spend <span class="arrow">▼</span></th>
+            <th data-sort="spend" class="bar-cell">Spend Share <span class="arrow">▼</span></th>
+            <th class="r" data-sort="leads">Leads <span class="arrow">▼</span></th>
+            <th class="r" data-sort="cpl">CPL <span class="arrow">▼</span></th>
+            <th class="r" data-sort="cases">Signed Cases <span class="arrow">▼</span></th>
+            <th class="r" data-sort="cpa">CPA <span class="arrow">▼</span></th>
+            <th class="r" data-sort="cvr">Lead → Case % <span class="arrow">▼</span></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2>Distribution Charts</h2>
+  <div class="charts">
+    <div class="chart-card">
+      <div class="chart-title">Spend by State (Top 10)</div>
+      <div id="chartSpend"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Signed Cases by State (Top 10)</div>
+      <div id="chartCases"></div>
+    </div>
+  </div>
+
+  <p class="note">Generated April 27, 2026 · Source: Case Source Marketing Dashboard – State Data</p>
+</div>
+
+<script>
+const RAW = [
+  {state:"Texas",         spend:51143.55, leads:459, cpl:111.42, cases:19, cpa:2691.77},
+  {state:"North Carolina",spend:26067.33, leads:201, cpl:129.69, cases:10, cpa:2606.73},
+  {state:"Ohio",          spend:25247.65, leads:199, cpl:126.87, cases:16, cpa:1577.98},
+  {state:"Georgia",       spend:20674.89, leads:167, cpl:123.80, cases:6,  cpa:3445.82},
+  {state:"Illinois",      spend:19576.87, leads:155, cpl:126.30, cases:11, cpa:1779.72},
+  {state:"Tennessee",     spend:17805.14, leads:133, cpl:133.87, cases:10, cpa:1780.51},
+  {state:"Missouri",      spend:16744.30, leads:128, cpl:130.81, cases:3,  cpa:5581.43},
+  {state:"Alabama",       spend:15740.85, leads:173, cpl:90.99,  cases:9,  cpa:1748.98},
+  {state:"Louisiana",     spend:11041.87, leads:122, cpl:90.51,  cases:5,  cpa:2208.37},
+  {state:"Indiana",       spend:9789.05,  leads:83,  cpl:117.94, cases:7,  cpa:1398.44},
+  {state:"Arizona",       spend:9787.48,  leads:84,  cpl:116.52, cases:3,  cpa:3262.49},
+  {state:"Nevada",        spend:7628.21,  leads:54,  cpl:141.26, cases:1,  cpa:7628.21},
+  {state:"Colorado",      spend:6318.55,  leads:57,  cpl:110.85, cases:4,  cpa:1579.64},
+  {state:"New Mexico",    spend:6247.24,  leads:64,  cpl:97.61,  cases:3,  cpa:2082.41},
+  {state:"Michigan",      spend:0.09,     leads:9,   cpl:0.01,   cases:1,  cpa:0.09},
+  {state:"Unknown",       spend:2.81,     leads:0,   cpl:null,   cases:0,  cpa:null},
+];
+
+const KPI = {cpl:{green:100,yellow:120}, cpa:{green:1800,yellow:2500}};
+
+const fmtMoney = v => v==null ? "—" : "$"+v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtMoney0= v => v==null ? "—" : "$"+Math.round(v).toLocaleString("en-US");
+const fmtInt   = v => v==null ? "—" : v.toLocaleString("en-US");
+const fmtPct   = v => v==null || isNaN(v) ? "—" : v.toFixed(1)+"%";
+
+function tier(metric, v){
+  if(v==null || isNaN(v)) return "na";
+  const k = KPI[metric];
+  if(!k) return "na";
+  if(v <= k.green) return "good";
+  if(v <= k.yellow) return "mid";
+  return "bad";
+}
+function badge(metric, v, fmt){
+  const t = tier(metric,v);
+  return `<span class="badge bg-${t}">${fmt(v)}</span>`;
+}
+
+const totalSpend = RAW.reduce((s,r)=>s+r.spend,0);
+const totalLeads = RAW.reduce((s,r)=>s+r.leads,0);
+const totalCases = RAW.reduce((s,r)=>s+r.cases,0);
+const blendedCPL = totalSpend/totalLeads;
+const blendedCPA = totalCases ? totalSpend/totalCases : null;
+
+// KPI cards
+const kpiGrid = document.getElementById("kpiGrid");
+const cards = [
+  {label:"Total Spend",      val:fmtMoney0(totalSpend), sub:`${RAW.length} states`},
+  {label:"Total Leads",      val:fmtInt(totalLeads),    sub:`Blended CPL ${fmtMoney(blendedCPL)}`},
+  {label:"Signed Cases",     val:fmtInt(totalCases),    sub:`Blended CPA ${fmtMoney0(blendedCPA)}`},
+  {label:"Lead → Case Rate", val:fmtPct(totalCases/totalLeads*100), sub:`${totalCases} / ${totalLeads}`},
+  {label:"Top Spend State",  val:"Texas",               sub:`${fmtMoney0(51143.55)} · 19 cases`},
+];
+kpiGrid.innerHTML = cards.map(c=>`
+  <div class="kpi-card">
+    <div class="kpi-label">${c.label}</div>
+    <div class="kpi-value">${c.val}</div>
+    <div class="kpi-sub">${c.sub}</div>
+  </div>`).join("");
+
+// Table
+const data = RAW.map(r=>({...r, cvr: r.leads ? r.cases/r.leads*100 : null}));
+let sortKey = "spend", sortDir = -1;
+const maxSpend = Math.max(...data.map(d=>d.spend));
+
+function render(){
+  const sorted = [...data].sort((a,b)=>{
+    const av = a[sortKey], bv = b[sortKey];
+    if(av==null && bv==null) return 0;
+    if(av==null) return 1;
+    if(bv==null) return -1;
+    if(typeof av === "string") return av.localeCompare(bv) * sortDir;
+    return (av-bv)*sortDir;
+  });
+  document.getElementById("tbody").innerHTML = sorted.map(r=>{
+    const sharePct = (r.spend/maxSpend*100).toFixed(0);
+    return `<tr>
+      <td class="state-cell">${r.state}</td>
+      <td class="r">${fmtMoney(r.spend)}</td>
+      <td class="bar-cell">
+        <div class="bar-bg"><div class="bar-fg" style="width:${sharePct}%"></div></div>
+        <span class="bar-val">${(r.spend/totalSpend*100).toFixed(1)}%</span>
+      </td>
+      <td class="r">${fmtInt(r.leads)}</td>
+      <td class="r">${badge("cpl", r.cpl, fmtMoney)}</td>
+      <td class="r">${fmtInt(r.cases)}</td>
+      <td class="r">${badge("cpa", r.cpa, fmtMoney0)}</td>
+      <td class="r">${fmtPct(r.cvr)}</td>
+    </tr>`;
+  }).join("");
+
+  document.querySelectorAll("#stateTable th").forEach(th=>{
+    th.classList.toggle("sorted", th.dataset.sort===sortKey);
+    const arr = th.querySelector(".arrow");
+    if(arr) arr.textContent = th.dataset.sort===sortKey ? (sortDir<0 ? "▼" : "▲") : "▼";
+  });
+}
+document.querySelectorAll("#stateTable th").forEach(th=>{
+  th.addEventListener("click", ()=>{
+    const k = th.dataset.sort;
+    if(!k) return;
+    if(sortKey===k) sortDir = -sortDir;
+    else { sortKey = k; sortDir = (k==="state") ? 1 : -1; }
+    render();
+  });
+});
+render();
+
+// Charts
+function hbar(rows, valFn, fmtFn, fillCls){
+  const max = Math.max(...rows.map(valFn));
+  return rows.map(r=>{
+    const v = valFn(r);
+    const pct = max>0 ? (v/max*100) : 0;
+    return `<div class="hbar-row">
+      <div class="hbar-label">${r.state}</div>
+      <div class="hbar-track"><div class="hbar-fill ${fillCls}" style="width:${pct}%"></div></div>
+      <div class="hbar-val-out">${fmtFn(v)}</div>
+    </div>`;
+  }).join("");
+}
+const top10Spend = [...data].sort((a,b)=>b.spend-a.spend).slice(0,10);
+const top10Cases = [...data].sort((a,b)=>b.cases-a.cases).slice(0,10);
+document.getElementById("chartSpend").innerHTML = hbar(top10Spend, r=>r.spend, fmtMoney0, "fill-spend");
+document.getElementById("chartCases").innerHTML = hbar(top10Cases, r=>r.cases, fmtInt, "fill-cases");
+</script>
+</body>
+</html>
