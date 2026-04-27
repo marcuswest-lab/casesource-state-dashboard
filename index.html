@@ -65,20 +65,8 @@ td.r{text-align:right}
 </head>
 <body>
 <div class="container">
-  <div class="header">
-    <h1>Case Source — State Performance Dashboard</h1>
-    <p class="subtitle">Spend · Leads · MQLs · Signed Cases · CPL / CP MQL / CPA by State</p>
-  </div>
-
   <div class="kpi-grid" id="kpiGrid"></div>
-  <p class="kpi-line">Targets — CPL: ≤$100 / ≤$120 &nbsp;·&nbsp; CP MQL: ≤$120 / ≤$160 &nbsp;·&nbsp; CPA: ≤$1,800 / ≤$2,500 &nbsp;·&nbsp; Sign Rate: ≥6% / ≥4%</p>
 
-  <h2>Performance by State</h2>
-  <div class="legend">
-    <span class="legend-item"><span class="legend-dot" style="background:#34D399"></span>On target</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#FBBF24"></span>Acceptable</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#F87171"></span>Off target</span>
-  </div>
   <div class="panel">
     <div class="table-wrap">
       <table id="stateTable">
@@ -101,27 +89,6 @@ td.r{text-align:right}
     </div>
   </div>
 
-  <h2>Distribution Charts</h2>
-  <div class="charts">
-    <div class="chart-card">
-      <div class="chart-title">Spend by State (Top 10)</div>
-      <div id="chartSpend"></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">MQL by State (Top 10)</div>
-      <div id="chartMql"></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Signed Cases by State (Top 10)</div>
-      <div id="chartCases"></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">CPA by State (Lower is Better) — Min 1 Case</div>
-      <div id="chartCpa"></div>
-    </div>
-  </div>
-
-  <p class="note">Generated April 27, 2026 · Source: Case Source Marketing Dashboard – State Data</p>
 </div>
 
 <script>
@@ -222,12 +189,12 @@ function render(){
         <span class="bar-val">${(r.spend/totalSpend*100).toFixed(1)}%</span>
       </td>
       <td class="r">${fmtInt(r.leads)}</td>
-      <td class="r">${badge("cpl", r.cpl, fmtMoney)}</td>
+      <td class="r">${fmtMoney(r.cpl)}</td>
       <td class="r">${fmtInt(r.mql)}</td>
-      <td class="r">${badge("cpmql", r.cpmql, fmtMoney0)}</td>
+      <td class="r">${fmtMoney0(r.cpmql)}</td>
       <td class="r">${fmtInt(r.cases)}</td>
-      <td class="r">${badge("signRate", r.signRate, fmtPct)}</td>
-      <td class="r">${badge("cpa", r.cpa, fmtMoney0)}</td>
+      <td class="r">${fmtPct(r.signRate)}</td>
+      <td class="r">${fmtMoney0(r.cpa)}</td>
     </tr>`;
   }).join("");
 
@@ -248,26 +215,6 @@ document.querySelectorAll("#stateTable th").forEach(th=>{
 });
 render();
 
-function hbar(rows, valFn, fmtFn, fillCls){
-  const max = Math.max(...rows.map(valFn));
-  return rows.map(r=>{
-    const v = valFn(r);
-    const pct = max>0 ? (v/max*100) : 0;
-    return `<div class="hbar-row">
-      <div class="hbar-label">${r.state}</div>
-      <div class="hbar-track"><div class="hbar-fill ${fillCls}" style="width:${pct}%"></div></div>
-      <div class="hbar-val-out">${fmtFn(v)}</div>
-    </div>`;
-  }).join("");
-}
-const top10Spend = [...RAW].sort((a,b)=>b.spend-a.spend).slice(0,10);
-const top10Mql   = [...RAW].sort((a,b)=>b.mql-a.mql).slice(0,10);
-const top10Cases = [...RAW].sort((a,b)=>b.cases-a.cases).slice(0,10);
-const cpaSorted  = RAW.filter(r=>r.cases>=1 && r.cpa!=null && r.cpa>1).sort((a,b)=>a.cpa-b.cpa);
-document.getElementById("chartSpend").innerHTML = hbar(top10Spend, r=>r.spend, fmtMoney0, "fill-spend");
-document.getElementById("chartMql").innerHTML   = hbar(top10Mql,   r=>r.mql,   fmtInt,    "fill-mql");
-document.getElementById("chartCases").innerHTML = hbar(top10Cases, r=>r.cases, fmtInt,    "fill-cases");
-document.getElementById("chartCpa").innerHTML   = hbar(cpaSorted,  r=>r.cpa,   fmtMoney0, "fill-cpa");
 </script>
 </body>
 </html>
