@@ -9,6 +9,9 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0C0F14;color:#E2E8F0;font-family:'DM Sans',sans-serif;padding:24px 24px 48px}
 .container{max-width:1500px;margin:0 auto}
+.header{text-align:center;margin-bottom:24px}
+h1{font-size:28px;font-weight:700;color:#F8FAFC;margin-bottom:6px}
+.subtitle{color:#94A3B8;font-size:14px}
 
 .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
 .kpi-card{background:#151922;border:1px solid #1E293B;border-radius:10px;padding:14px 16px}
@@ -19,23 +22,29 @@ body{background:#0C0F14;color:#E2E8F0;font-family:'DM Sans',sans-serif;padding:2
 .panel{background:#0F1319;border:1px solid #1E293B;border-radius:10px;overflow:hidden}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:#151922;color:#94A3B8;font-weight:600;padding:11px 14px;text-align:left;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:2px solid #1E293B;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+th{background:#151922;color:#94A3B8;font-weight:600;padding:11px 12px;text-align:left;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:2px solid #1E293B;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
 th:hover{color:#CBD5E1}
 th .arrow{font-size:9px;margin-left:3px;opacity:.3}
 th.sorted .arrow{opacity:1;color:#3B82F6}
-td{padding:10px 14px;border-bottom:1px solid #1E293B;white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:12px}
+td{padding:10px 12px;border-bottom:1px solid #1E293B;white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:12px}
 tr:hover td{background:#1a1f2e}
 td.state-cell{font-family:'DM Sans',sans-serif;font-weight:500;color:#F1F5F9;font-size:13px}
-td.r{text-align:right}
+td.r,th.r{text-align:right}
 
-.bar-cell{position:relative;min-width:130px}
-.bar-bg{position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%);height:6px;background:#1E293B;border-radius:3px;overflow:hidden;z-index:0}
-.bar-fg{height:100%;background:linear-gradient(90deg,#3B82F6,#60A5FA);border-radius:3px}
-.bar-val{position:relative;z-index:1;display:inline-block;background:#0F1319;padding:0 6px;border-radius:3px;font-size:12px}
+.bar-cell{min-width:160px;width:18%}
+.bar-cell .bar-wrap{display:flex;align-items:center;gap:10px}
+.bar-val{flex-shrink:0;font-size:12px;min-width:42px}
+.bar-bg{flex:1;height:6px;background:#1E293B;border-radius:3px;overflow:hidden}
+.bar-fg{height:100%;background:linear-gradient(90deg,#3B82F6,#60A5FA);border-radius:3px;min-width:2px}
 </style>
 </head>
 <body>
 <div class="container">
+  <div class="header">
+    <h1>Case Source — State Performance</h1>
+    <p class="subtitle">Spend, Leads, CPL, Signed Cases & CPA by State</p>
+  </div>
+
   <div class="kpi-grid" id="kpiGrid"></div>
 
   <div class="panel">
@@ -118,13 +127,15 @@ function render(){
     return (av-bv)*sortDir;
   });
   document.getElementById("tbody").innerHTML = sorted.map(r=>{
-    const sharePct = (r.spend/maxSpend*100).toFixed(0);
+    const sharePct = r.spend/totalSpend*100;
     return `<tr>
       <td class="state-cell">${r.state}</td>
       <td class="r">${fmtMoney(r.spend)}</td>
       <td class="bar-cell">
-        <div class="bar-bg"><div class="bar-fg" style="width:${sharePct}%"></div></div>
-        <span class="bar-val">${(r.spend/totalSpend*100).toFixed(1)}%</span>
+        <div class="bar-wrap">
+          <span class="bar-val">${sharePct.toFixed(1)}%</span>
+          <div class="bar-bg"><div class="bar-fg" style="width:${sharePct.toFixed(1)}%"></div></div>
+        </div>
       </td>
       <td class="r">${fmtInt(r.leads)}</td>
       <td class="r">${fmtMoney(r.cpl)}</td>
