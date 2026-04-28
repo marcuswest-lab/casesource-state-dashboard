@@ -9,20 +9,12 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0C0F14;color:#E2E8F0;font-family:'DM Sans',sans-serif;padding:24px 24px 48px}
 .container{max-width:1500px;margin:0 auto}
-.header{text-align:center;margin-bottom:24px}
-h1{font-size:28px;font-weight:700;color:#F8FAFC;margin-bottom:6px}
-.subtitle{color:#94A3B8;font-size:14px}
-h2{font-size:16px;font-weight:600;color:#CBD5E1;margin:24px 0 12px;text-transform:uppercase;letter-spacing:.6px}
 
-.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:8px}
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
 .kpi-card{background:#151922;border:1px solid #1E293B;border-radius:10px;padding:14px 16px}
 .kpi-label{color:#94A3B8;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
 .kpi-value{font-size:20px;font-weight:700;color:#F8FAFC;font-family:'JetBrains Mono',monospace}
 .kpi-sub{color:#64748B;font-size:11px;margin-top:4px;font-family:'JetBrains Mono',monospace}
-
-.legend{display:flex;justify-content:flex-end;gap:18px;font-size:11px;color:#94A3B8;margin-bottom:10px;flex-wrap:wrap;align-items:center}
-.legend-item{display:inline-flex;align-items:center;gap:5px}
-.legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
 
 .panel{background:#0F1319;border:1px solid #1E293B;border-radius:10px;overflow:hidden}
 .table-wrap{overflow-x:auto}
@@ -35,36 +27,17 @@ td{padding:10px 14px;border-bottom:1px solid #1E293B;white-space:nowrap;font-fam
 tr:hover td{background:#1a1f2e}
 td.state-cell{font-family:'DM Sans',sans-serif;font-weight:500;color:#F1F5F9;font-size:13px}
 td.r{text-align:right}
-.badge{display:inline-block;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace}
-.bg-good{background:rgba(52,211,153,.15);color:#34D399}
-.bg-mid{background:rgba(251,191,36,.15);color:#FBBF24}
-.bg-bad{background:rgba(248,113,113,.15);color:#F87171}
-.bg-na{color:#475569}
 
 .bar-cell{position:relative;min-width:130px}
 .bar-bg{position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%);height:6px;background:#1E293B;border-radius:3px;overflow:hidden;z-index:0}
 .bar-fg{height:100%;background:linear-gradient(90deg,#3B82F6,#60A5FA);border-radius:3px}
 .bar-val{position:relative;z-index:1;display:inline-block;background:#0F1319;padding:0 6px;border-radius:3px;font-size:12px}
-
-.charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:8px}
-.chart-card{background:#151922;border:1px solid #1E293B;border-radius:10px;padding:16px 18px}
-.chart-title{font-size:12px;color:#94A3B8;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
-.hbar-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;font-size:12px}
-.hbar-label{width:130px;color:#CBD5E1;font-family:'DM Sans',sans-serif;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hbar-track{flex:1;height:18px;background:#0C0F14;border-radius:4px;overflow:hidden;position:relative}
-.hbar-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;color:#0C0F14;font-weight:700;font-family:'JetBrains Mono',monospace;font-size:11px;min-width:28px}
-.fill-spend{background:linear-gradient(90deg,#3B82F6,#60A5FA)}
-.fill-mql{background:linear-gradient(90deg,#A78BFA,#C4B5FD)}
-.fill-cases{background:linear-gradient(90deg,#34D399,#6EE7B7)}
-.fill-cpa{background:linear-gradient(90deg,#F87171,#FCA5A5)}
-.hbar-val-out{font-family:'JetBrains Mono',monospace;font-size:11px;color:#94A3B8;width:80px;text-align:right;flex-shrink:0}
-
-.note{color:#64748B;font-size:11px;margin-top:14px;padding:0 4px;text-align:center}
-.kpi-line{color:#64748B;font-size:11px;text-align:center;margin-top:4px}
 </style>
 </head>
 <body>
 <div class="container">
+  <div class="kpi-grid" id="kpiGrid"></div>
+
   <div class="panel">
     <div class="table-wrap">
       <table id="stateTable">
@@ -75,8 +48,6 @@ td.r{text-align:right}
             <th data-sort="spend" class="bar-cell">Spend Share <span class="arrow">▼</span></th>
             <th class="r" data-sort="leads">Leads <span class="arrow">▼</span></th>
             <th class="r" data-sort="cpl">CPL <span class="arrow">▼</span></th>
-            <th class="r" data-sort="mql">MQL <span class="arrow">▼</span></th>
-            <th class="r" data-sort="cpmql">CP MQL <span class="arrow">▼</span></th>
             <th class="r" data-sort="cases">Signed <span class="arrow">▼</span></th>
             <th class="r" data-sort="signRate">Sign Rate <span class="arrow">▼</span></th>
             <th class="r" data-sort="cpa">CPA <span class="arrow">▼</span></th>
@@ -86,79 +57,48 @@ td.r{text-align:right}
       </table>
     </div>
   </div>
-
 </div>
 
 <script>
 const RAW = [
-  {state:"Texas",         spend:51143.55, leads:459, cpl:111.42, mql:122, cpmql:419.21,  cases:19, signRate:4.14, cpa:2691.77},
-  {state:"North Carolina",spend:26067.33, leads:201, cpl:129.69, mql:81,  cpmql:321.82,  cases:10, signRate:4.98, cpa:2606.73},
-  {state:"Ohio",          spend:25247.65, leads:199, cpl:126.87, mql:62,  cpmql:407.22,  cases:16, signRate:8.04, cpa:1577.98},
-  {state:"Georgia",       spend:20674.89, leads:167, cpl:123.80, mql:53,  cpmql:390.09,  cases:6,  signRate:3.59, cpa:3445.82},
-  {state:"Illinois",      spend:19576.87, leads:155, cpl:126.30, mql:57,  cpmql:343.45,  cases:11, signRate:7.10, cpa:1779.72},
-  {state:"Tennessee",     spend:17805.14, leads:133, cpl:133.87, mql:42,  cpmql:423.93,  cases:10, signRate:7.52, cpa:1780.51},
-  {state:"Missouri",      spend:16744.30, leads:128, cpl:130.81, mql:35,  cpmql:478.41,  cases:3,  signRate:2.34, cpa:5581.43},
-  {state:"Alabama",       spend:15740.85, leads:173, cpl:90.99,  mql:43,  cpmql:366.07,  cases:9,  signRate:5.20, cpa:1748.98},
-  {state:"Louisiana",     spend:11041.87, leads:122, cpl:90.51,  mql:39,  cpmql:283.12,  cases:5,  signRate:4.10, cpa:2208.37},
-  {state:"Indiana",       spend:9789.05,  leads:83,  cpl:117.94, mql:27,  cpmql:362.56,  cases:7,  signRate:8.43, cpa:1398.44},
-  {state:"Arizona",       spend:9787.48,  leads:84,  cpl:116.52, mql:24,  cpmql:407.81,  cases:3,  signRate:3.57, cpa:3262.49},
-  {state:"Nevada",        spend:7628.21,  leads:54,  cpl:141.26, mql:7,   cpmql:1089.74, cases:1,  signRate:1.85, cpa:7628.21},
-  {state:"Colorado",      spend:6318.55,  leads:58,  cpl:108.94, mql:12,  cpmql:526.55,  cases:4,  signRate:6.90, cpa:1579.64},
-  {state:"New Mexico",    spend:6247.24,  leads:64,  cpl:97.61,  mql:18,  cpmql:347.07,  cases:3,  signRate:4.69, cpa:2082.41},
-  {state:"Michigan",      spend:0.09,     leads:9,   cpl:0.01,   mql:3,   cpmql:0.03,    cases:1,  signRate:11.11, cpa:0.09},
-  {state:"Unknown",       spend:2.81,     leads:0,   cpl:null,   mql:0,   cpmql:null,    cases:0,  signRate:null,  cpa:null},
+  {state:"Texas",         spend:51143.55, leads:459, cpl:111.42, cases:19, signRate:4.14, cpa:2691.77},
+  {state:"North Carolina",spend:26067.33, leads:201, cpl:129.69, cases:10, signRate:4.98, cpa:2606.73},
+  {state:"Ohio",          spend:25247.65, leads:199, cpl:126.87, cases:16, signRate:8.04, cpa:1577.98},
+  {state:"Georgia",       spend:20674.89, leads:167, cpl:123.80, cases:6,  signRate:3.59, cpa:3445.82},
+  {state:"Illinois",      spend:19576.87, leads:155, cpl:126.30, cases:11, signRate:7.10, cpa:1779.72},
+  {state:"Tennessee",     spend:17805.14, leads:133, cpl:133.87, cases:10, signRate:7.52, cpa:1780.51},
+  {state:"Missouri",      spend:16744.30, leads:128, cpl:130.81, cases:3,  signRate:2.34, cpa:5581.43},
+  {state:"Alabama",       spend:15740.85, leads:173, cpl:90.99,  cases:9,  signRate:5.20, cpa:1748.98},
+  {state:"Louisiana",     spend:11041.87, leads:122, cpl:90.51,  cases:5,  signRate:4.10, cpa:2208.37},
+  {state:"Indiana",       spend:9789.05,  leads:83,  cpl:117.94, cases:7,  signRate:8.43, cpa:1398.44},
+  {state:"Arizona",       spend:9787.48,  leads:84,  cpl:116.52, cases:3,  signRate:3.57, cpa:3262.49},
+  {state:"Nevada",        spend:7628.21,  leads:54,  cpl:141.26, cases:1,  signRate:1.85, cpa:7628.21},
+  {state:"Colorado",      spend:6318.55,  leads:58,  cpl:108.94, cases:4,  signRate:6.90, cpa:1579.64},
+  {state:"New Mexico",    spend:6247.24,  leads:64,  cpl:97.61,  cases:3,  signRate:4.69, cpa:2082.41},
+  {state:"Michigan",      spend:0.09,     leads:9,   cpl:0.01,   cases:1,  signRate:11.11,cpa:0.09},
+  {state:"Unknown",       spend:2.81,     leads:0,   cpl:null,   cases:0,  signRate:null, cpa:null},
 ];
-
-const KPI = {
-  cpl:{green:100,yellow:120,lower:true},
-  cpmql:{green:120,yellow:160,lower:true},
-  cpa:{green:1800,yellow:2500,lower:true},
-  signRate:{green:6,yellow:4,lower:false},
-};
 
 const fmtMoney = v => v==null ? "—" : "$"+v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtMoney0= v => v==null ? "—" : "$"+Math.round(v).toLocaleString("en-US");
 const fmtInt   = v => v==null ? "—" : v.toLocaleString("en-US");
 const fmtPct   = v => v==null || isNaN(v) ? "—" : v.toFixed(2)+"%";
 
-function tier(metric, v){
-  if(v==null || isNaN(v)) return "na";
-  const k = KPI[metric];
-  if(!k) return "na";
-  if(k.lower){
-    if(v <= k.green) return "good";
-    if(v <= k.yellow) return "mid";
-    return "bad";
-  } else {
-    if(v >= k.green) return "good";
-    if(v >= k.yellow) return "mid";
-    return "bad";
-  }
-}
-function badge(metric, v, fmt){
-  const t = tier(metric,v);
-  return `<span class="badge bg-${t}">${fmt(v)}</span>`;
-}
-
 const totalSpend = RAW.reduce((s,r)=>s+r.spend,0);
 const totalLeads = RAW.reduce((s,r)=>s+r.leads,0);
-const totalMql   = RAW.reduce((s,r)=>s+r.mql,0);
 const totalCases = RAW.reduce((s,r)=>s+r.cases,0);
 const blendedCPL  = totalLeads ? totalSpend/totalLeads : null;
-const blendedCPMql= totalMql   ? totalSpend/totalMql   : null;
 const blendedCPA  = totalCases ? totalSpend/totalCases : null;
 const blendedSign = totalLeads ? totalCases/totalLeads*100 : null;
 
-const kpiGrid = document.getElementById("kpiGrid");
 const cards = [
   {label:"Total Spend",   val:fmtMoney0(totalSpend), sub:`${RAW.length} states`},
   {label:"Leads",         val:fmtInt(totalLeads),    sub:`Blended CPL ${fmtMoney(blendedCPL)}`},
-  {label:"MQLs",          val:fmtInt(totalMql),      sub:`Blended CP MQL ${fmtMoney0(blendedCPMql)}`},
   {label:"Signed Cases",  val:fmtInt(totalCases),    sub:`Blended CPA ${fmtMoney0(blendedCPA)}`},
   {label:"Sign Rate",     val:fmtPct(blendedSign),   sub:`${totalCases} cases / ${totalLeads} leads`},
   {label:"Top State",     val:"Texas",               sub:`${fmtMoney0(51143.55)} · 19 cases`},
 ];
-kpiGrid.innerHTML = cards.map(c=>`
+document.getElementById("kpiGrid").innerHTML = cards.map(c=>`
   <div class="kpi-card">
     <div class="kpi-label">${c.label}</div>
     <div class="kpi-value">${c.val}</div>
@@ -188,8 +128,6 @@ function render(){
       </td>
       <td class="r">${fmtInt(r.leads)}</td>
       <td class="r">${fmtMoney(r.cpl)}</td>
-      <td class="r">${fmtInt(r.mql)}</td>
-      <td class="r">${fmtMoney0(r.cpmql)}</td>
       <td class="r">${fmtInt(r.cases)}</td>
       <td class="r">${fmtPct(r.signRate)}</td>
       <td class="r">${fmtMoney0(r.cpa)}</td>
@@ -212,7 +150,6 @@ document.querySelectorAll("#stateTable th").forEach(th=>{
   });
 });
 render();
-
 </script>
 </body>
 </html>
