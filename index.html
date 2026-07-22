@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Case Source State Performance Dashboard</title>
+<title>Case Source — State Performance Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0C0F14;color:#E2E8F0;font-family:'DM Sans',sans-serif;padding:24px 24px 48px}
-.container{max-width:1500px;margin:0 auto}
-.header{text-align:center;margin-bottom:24px}
+.container{max-width:1600px;margin:0 auto}
+.header{text-align:center;margin-bottom:20px}
 h1{font-size:28px;font-weight:700;color:#F8FAFC;margin-bottom:6px}
 .subtitle{color:#94A3B8;font-size:14px}
-
-.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+.daterange{display:inline-block;margin-top:8px;padding:4px 12px;background:#151922;border:1px solid #1E293B;border-radius:20px;color:#60A5FA;font-size:12px;font-family:'JetBrains Mono',monospace;font-weight:500}
+.sources{color:#64748B;font-size:11px;margin-top:8px}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
 .kpi-card{background:#151922;border:1px solid #1E293B;border-radius:10px;padding:14px 16px}
 .kpi-label{color:#94A3B8;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
 .kpi-value{font-size:20px;font-weight:700;color:#F8FAFC;font-family:'JetBrains Mono',monospace}
 .kpi-sub{color:#64748B;font-size:11px;margin-top:4px;font-family:'JetBrains Mono',monospace}
-
 .panel{background:#0F1319;border:1px solid #1E293B;border-radius:10px;overflow:hidden}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -30,136 +30,65 @@ td{padding:10px 12px;border-bottom:1px solid #1E293B;white-space:nowrap;font-fam
 tr:hover td{background:#1a1f2e}
 td.state-cell{font-family:'DM Sans',sans-serif;font-weight:500;color:#F1F5F9;font-size:13px}
 td.r,th.r{text-align:right}
-
-.bar-cell{min-width:160px;width:18%}
+.bar-cell{min-width:150px;width:14%}
 .bar-cell .bar-wrap{display:flex;align-items:center;gap:10px}
 .bar-val{flex-shrink:0;font-size:12px;min-width:42px}
 .bar-bg{flex:1;height:6px;background:#1E293B;border-radius:3px;overflow:hidden}
 .bar-fg{height:100%;background:linear-gradient(90deg,#3B82F6,#60A5FA);border-radius:3px;min-width:2px}
+.good{color:#4ADE80}.bad{color:#F87171}.warn{color:#FBBF24}
+.note{color:#64748B;font-size:11px;margin-top:12px;line-height:1.6}
 </style>
 </head>
 <body>
 <div class="container">
   <div class="header">
     <h1>Case Source — State Performance</h1>
-    <p class="subtitle">Spend, Leads, CPL, Signed Cases & CPA by State</p>
+    <p class="subtitle">Spend · Leads · CPL · MQL · CP-MQL · Signed Cases · CPA by State</p>
+    <div class="daterange">Reporting window: Feb 20 – Jul 22, 2026</div>
+    <p class="sources">Spend: Meta ad-account export (Feb 20+) · Signed: matched Purchases (col N = "Match") · Leads &amp; MQL: Leads-WP + Leads-GHL + Leads-GHL Spanish · CAC target ~$1,800</p>
   </div>
-
-  <div class="kpi-grid" id="kpiGrid"></div>
-
-  <div class="panel">
-    <div class="table-wrap">
-      <table id="stateTable">
-        <thead>
-          <tr>
-            <th data-sort="state">State <span class="arrow">▼</span></th>
-            <th class="r" data-sort="spend">Spend <span class="arrow">▼</span></th>
-            <th data-sort="spend" class="bar-cell">Spend Share <span class="arrow">▼</span></th>
-            <th class="r" data-sort="leads">Leads <span class="arrow">▼</span></th>
-            <th class="r" data-sort="cpl">CPL <span class="arrow">▼</span></th>
-            <th class="r" data-sort="cases">Signed <span class="arrow">▼</span></th>
-            <th class="r" data-sort="signRate">Sign Rate <span class="arrow">▼</span></th>
-            <th class="r" data-sort="cpa">CPA <span class="arrow">▼</span></th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-  </div>
+  <div class="panel"><div class="table-wrap"><table id="stateTable"><thead><tr>
+    <th data-sort="state">State <span class="arrow">▼</span></th>
+    <th class="r" data-sort="spend">Spend <span class="arrow">▼</span></th>
+    <th class="r" data-sort="leads">Leads <span class="arrow">▼</span></th>
+    <th class="r" data-sort="cpl">CPL <span class="arrow">▼</span></th>
+    <th class="r" data-sort="mql">MQL <span class="arrow">▼</span></th>
+    <th class="r" data-sort="cpmql">CP-MQL <span class="arrow">▼</span></th>
+    <th class="r" data-sort="qualPct">Qual % <span class="arrow">▼</span></th>
+    <th class="r" data-sort="cases">Signed <span class="arrow">▼</span></th>
+    <th class="r" data-sort="cpa">CPA <span class="arrow">▼</span></th>
+    <th class="r" data-sort="signRate">Sign % <span class="arrow">▼</span></th>
+    <th class="r" data-sort="qualClose">Qual Close % <span class="arrow">▼</span></th>
+  </tr></thead><tbody id="tbody"></tbody></table></div></div>
+  <p class="note">CPA target ~$1,800 — <span class="good">green</span> CPA under target, <span class="warn">amber</span> up to 1.5×, <span class="bad">red</span> above. States with spend but no leads/MQL fall outside the lead-tab date coverage (GHL leads begin Apr 8); CPA remains valid across the full window. Click any column header to sort.</p>
 </div>
-
 <script>
-const RAW = [
-  {state:"Texas",         spend:51143.55, leads:459, cpl:111.42, cases:19, signRate:4.14, cpa:2691.77},
-  {state:"North Carolina",spend:26067.33, leads:201, cpl:129.69, cases:10, signRate:4.98, cpa:2606.73},
-  {state:"Ohio",          spend:25247.65, leads:199, cpl:126.87, cases:16, signRate:8.04, cpa:1577.98},
-  {state:"Georgia",       spend:20674.89, leads:167, cpl:123.80, cases:6,  signRate:3.59, cpa:3445.82},
-  {state:"Illinois",      spend:19576.87, leads:155, cpl:126.30, cases:11, signRate:7.10, cpa:1779.72},
-  {state:"Tennessee",     spend:17805.14, leads:133, cpl:133.87, cases:10, signRate:7.52, cpa:1780.51},
-  {state:"Missouri",      spend:16744.30, leads:128, cpl:130.81, cases:3,  signRate:2.34, cpa:5581.43},
-  {state:"Alabama",       spend:15740.85, leads:173, cpl:90.99,  cases:9,  signRate:5.20, cpa:1748.98},
-  {state:"Louisiana",     spend:11041.87, leads:122, cpl:90.51,  cases:5,  signRate:4.10, cpa:2208.37},
-  {state:"Indiana",       spend:9789.05,  leads:83,  cpl:117.94, cases:7,  signRate:8.43, cpa:1398.44},
-  {state:"Arizona",       spend:9787.48,  leads:84,  cpl:116.52, cases:3,  signRate:3.57, cpa:3262.49},
-  {state:"Nevada",        spend:7628.21,  leads:54,  cpl:141.26, cases:1,  signRate:1.85, cpa:7628.21},
-  {state:"Colorado",      spend:6318.55,  leads:58,  cpl:108.94, cases:4,  signRate:6.90, cpa:1579.64},
-  {state:"New Mexico",    spend:6247.24,  leads:64,  cpl:97.61,  cases:3,  signRate:4.69, cpa:2082.41},
-  {state:"Michigan",      spend:0.09,     leads:9,   cpl:0.01,   cases:1,  signRate:11.11,cpa:0.09},
-  {state:"Unknown",       spend:2.81,     leads:0,   cpl:null,   cases:0,  signRate:null, cpa:null},
-];
-
-const fmtMoney = v => v==null ? "—" : "$"+v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-const fmtMoney0= v => v==null ? "—" : "$"+Math.round(v).toLocaleString("en-US");
-const fmtInt   = v => v==null ? "—" : v.toLocaleString("en-US");
-const fmtPct   = v => v==null || isNaN(v) ? "—" : v.toFixed(2)+"%";
-
-const totalSpend = RAW.reduce((s,r)=>s+r.spend,0);
-const totalLeads = RAW.reduce((s,r)=>s+r.leads,0);
-const totalCases = RAW.reduce((s,r)=>s+r.cases,0);
-const blendedCPL  = totalLeads ? totalSpend/totalLeads : null;
-const blendedCPA  = totalCases ? totalSpend/totalCases : null;
-const blendedSign = totalLeads ? totalCases/totalLeads*100 : null;
-
-const cards = [
-  {label:"Total Spend",   val:fmtMoney0(totalSpend), sub:`${RAW.length} states`},
-  {label:"Leads",         val:fmtInt(totalLeads),    sub:`Blended CPL ${fmtMoney(blendedCPL)}`},
-  {label:"Signed Cases",  val:fmtInt(totalCases),    sub:`Blended CPA ${fmtMoney0(blendedCPA)}`},
-  {label:"Sign Rate",     val:fmtPct(blendedSign),   sub:`${totalCases} cases / ${totalLeads} leads`},
-  {label:"Top State",     val:"Texas",               sub:`${fmtMoney0(51143.55)} · 19 cases`},
-];
-document.getElementById("kpiGrid").innerHTML = cards.map(c=>`
-  <div class="kpi-card">
-    <div class="kpi-label">${c.label}</div>
-    <div class="kpi-value">${c.val}</div>
-    <div class="kpi-sub">${c.sub}</div>
-  </div>`).join("");
-
-let sortKey = "spend", sortDir = -1;
-const maxSpend = Math.max(...RAW.map(d=>d.spend));
-
+const RAW=[{"state":"Texas","abbr":"TX","spend":245954.42,"leads":1489,"mql":507,"cases":78,"cpl":165.18,"cpmql":485.12,"cpa":3153.26,"qualPct":34.05,"signRate":5.24},{"state":"North Carolina","abbr":"NC","spend":154248.78,"leads":971,"mql":457,"cases":62,"cpl":158.86,"cpmql":337.52,"cpa":2487.88,"qualPct":47.06,"signRate":6.39},{"state":"Ohio","abbr":"OH","spend":138309.34,"leads":837,"mql":344,"cases":44,"cpl":165.24,"cpmql":402.06,"cpa":3143.39,"qualPct":41.1,"signRate":5.26},{"state":"Georgia","abbr":"GA","spend":117459.96,"leads":634,"mql":257,"cases":27,"cpl":185.27,"cpmql":457.04,"cpa":4350.37,"qualPct":40.54,"signRate":4.26},{"state":"Illinois","abbr":"IL","spend":114258.11,"leads":676,"mql":286,"cases":42,"cpl":169.02,"cpmql":399.5,"cpa":2720.43,"qualPct":42.31,"signRate":6.21},{"state":"Tennessee","abbr":"TN","spend":93244.62,"leads":547,"mql":214,"cases":39,"cpl":170.47,"cpmql":435.72,"cpa":2390.89,"qualPct":39.12,"signRate":7.13},{"state":"Missouri","abbr":"MO","spend":74175.24,"leads":450,"mql":179,"cases":22,"cpl":164.83,"cpmql":414.39,"cpa":3371.6,"qualPct":39.78,"signRate":4.89},{"state":"Indiana","abbr":"IN","spend":71346.63,"leads":422,"mql":210,"cases":29,"cpl":169.07,"cpmql":339.75,"cpa":2460.23,"qualPct":49.76,"signRate":6.87},{"state":"Louisiana","abbr":"LA","spend":68764.34,"leads":439,"mql":180,"cases":17,"cpl":156.64,"cpmql":382.02,"cpa":4044.96,"qualPct":41.0,"signRate":3.87},{"state":"Alabama","abbr":"AL","spend":66788.3,"leads":471,"mql":179,"cases":32,"cpl":141.8,"cpmql":373.12,"cpa":2087.13,"qualPct":38.0,"signRate":6.79},{"state":"Arizona","abbr":"AZ","spend":46580.06,"leads":304,"mql":103,"cases":8,"cpl":153.22,"cpmql":452.23,"cpa":5822.51,"qualPct":33.88,"signRate":2.63},{"state":"Massachusetts","abbr":"MA","spend":40174.32,"leads":222,"mql":87,"cases":10,"cpl":180.97,"cpmql":461.77,"cpa":4017.43,"qualPct":39.19,"signRate":4.5},{"state":"Oklahoma","abbr":"OK","spend":39841.07,"leads":303,"mql":114,"cases":18,"cpl":131.49,"cpmql":349.48,"cpa":2213.39,"qualPct":37.62,"signRate":5.94},{"state":"Colorado","abbr":"CO","spend":37730.14,"leads":228,"mql":80,"cases":13,"cpl":165.48,"cpmql":471.63,"cpa":2902.32,"qualPct":35.09,"signRate":5.7},{"state":"Nevada","abbr":"NV","spend":32413.22,"leads":203,"mql":37,"cases":8,"cpl":159.67,"cpmql":876.03,"cpa":4051.65,"qualPct":18.23,"signRate":3.94},{"state":"New Mexico","abbr":"NM","spend":20949.33,"leads":163,"mql":60,"cases":13,"cpl":128.52,"cpmql":349.16,"cpa":1611.49,"qualPct":36.81,"signRate":7.98},{"state":"Minnesota","abbr":"MN","spend":11719.07,"leads":82,"mql":31,"cases":7,"cpl":142.92,"cpmql":378.03,"cpa":1674.15,"qualPct":37.8,"signRate":8.54},{"state":"Kansas","abbr":"KS","spend":5802.12,"leads":76,"mql":34,"cases":4,"cpl":76.34,"cpmql":170.65,"cpa":1450.53,"qualPct":44.74,"signRate":5.26},{"state":"Utah","abbr":"UT","spend":5590.71,"leads":44,"mql":18,"cases":2,"cpl":127.06,"cpmql":310.59,"cpa":2795.35,"qualPct":40.91,"signRate":4.55},{"state":"Michigan","abbr":"MI","spend":0.09,"leads":44,"mql":19,"cases":1,"cpl":0.0,"cpmql":0.0,"cpa":0.09,"qualPct":43.18,"signRate":2.27},{"state":"South Carolina","abbr":"SC","spend":0.02,"leads":138,"mql":49,"cases":6,"cpl":0.0,"cpmql":0.0,"cpa":0.0,"qualPct":35.51,"signRate":4.35},{"state":"Iowa","abbr":"IA","spend":0.0,"leads":18,"mql":7,"cases":1,"cpl":null,"cpmql":null,"cpa":null,"qualPct":38.89,"signRate":5.56},{"state":"New Hampshire","abbr":"New Hampshire","spend":0.0,"leads":7,"mql":5,"cases":0,"cpl":null,"cpmql":null,"cpa":null,"qualPct":71.43,"signRate":0.0},{"state":"California","abbr":"CA","spend":0.0,"leads":59,"mql":16,"cases":2,"cpl":null,"cpmql":null,"cpa":null,"qualPct":27.12,"signRate":3.39},{"state":"Rhode Island","abbr":"Rhode Island","spend":0.0,"leads":14,"mql":3,"cases":0,"cpl":null,"cpmql":null,"cpa":null,"qualPct":21.43,"signRate":0.0},{"state":"Delaware","abbr":"Delaware","spend":0.0,"leads":8,"mql":3,"cases":0,"cpl":null,"cpmql":null,"cpa":null,"qualPct":37.5,"signRate":0.0},{"state":"Connecticut","abbr":"Connecticut","spend":0.0,"leads":16,"mql":5,"cases":0,"cpl":null,"cpmql":null,"cpa":null,"qualPct":31.25,"signRate":0.0},{"state":"Nebraska","abbr":"NE","spend":0.0,"leads":10,"mql":5,"cases":0,"cpl":null,"cpmql":null,"cpa":null,"qualPct":50.0,"signRate":0.0},{"state":"Arkansas","abbr":"AR","spend":0.0,"leads":106,"mql":57,"cases":6,"cpl":null,"cpmql":null,"cpa":null,"qualPct":53.77,"signRate":5.66},{"state":"Pennsylvania","abbr":"PA","spend":0.0,"leads":20,"mql":7,"cases":2,"cpl":null,"cpmql":null,"cpa":null,"qualPct":35.0,"signRate":10.0},{"state":"Washington","abbr":"WA","spend":0.0,"leads":11,"mql":1,"cases":0,"cpl":null,"cpmql":null,"cpa":null,"qualPct":9.09,"signRate":0.0},{"state":"Hawaii","abbr":"Hawaii","spend":0.0,"leads":1,"mql":1,"cases":0,"cpl":null,"cpmql":null,"cpa":null,"qualPct":100.0,"signRate":0.0},{"state":"New Jersey","abbr":"New Jersey","spend":0.0,"leads":13,"mql":7,"cases":0,"cpl":null,"cpmql":null,"cpa":null,"qualPct":53.85,"signRate":0.0},{"state":"Maryland","abbr":"MD","spend":0.0,"leads":16,"mql":6,"cases":0,"cpl":null,"cpmql":null,"cpa":null,"qualPct":37.5,"signRate":0.0},{"state":"Idaho","abbr":"Idaho","spend":0.0,"leads":9,"mql":2,"cases":0,"cpl":null,"cpmql":null,"cpa":null,"qualPct":22.22,"signRate":0.0},{"state":"Maine","abbr":"ME","spend":0.0,"leads":10,"mql":5,"cases":1,"cpl":null,"cpmql":null,"cpa":null,"qualPct":50.0,"signRate":10.0},{"state":"Alaska","abbr":"Alaska","spend":0.0,"leads":11,"mql":2,"cases":0,"cpl":null,"cpmql":null,"cpa":null,"qualPct":18.18,"signRate":0.0},{"state":"Kentucky","abbr":"KY","spend":0.0,"leads":101,"mql":40,"cases":3,"cpl":null,"cpmql":null,"cpa":null,"qualPct":39.6,"signRate":2.97},{"state":"West Virginia","abbr":"WV","spend":0.0,"leads":22,"mql":13,"cases":1,"cpl":null,"cpmql":null,"cpa":null,"qualPct":59.09,"signRate":4.55},{"state":"Virginia","abbr":"VA","spend":0.0,"leads":34,"mql":16,"cases":4,"cpl":null,"cpmql":null,"cpa":null,"qualPct":47.06,"signRate":11.76},{"state":"Montana","abbr":"MT","spend":0.0,"leads":11,"mql":5,"cases":2,"cpl":null,"cpmql":null,"cpa":null,"qualPct":45.45,"signRate":18.18},{"state":"New York","abbr":"NY","spend":0.0,"leads":30,"mql":12,"cases":1,"cpl":null,"cpmql":null,"cpa":null,"qualPct":40.0,"signRate":3.33},{"state":"North Dakota","abbr":"ND","spend":0.0,"leads":10,"mql":4,"cases":1,"cpl":null,"cpmql":null,"cpa":null,"qualPct":40.0,"signRate":10.0},{"state":"Florida","abbr":"FL","spend":0.0,"leads":92,"mql":39,"cases":1,"cpl":null,"cpmql":null,"cpa":null,"qualPct":42.39,"signRate":1.09},{"state":"Oregon","abbr":"OR","spend":0.0,"leads":10,"mql":4,"cases":0,"cpl":null,"cpmql":null,"cpa":null,"qualPct":40.0,"signRate":0.0},{"state":"Mississippi","abbr":"MS","spend":0.0,"leads":76,"mql":31,"cases":7,"cpl":null,"cpmql":null,"cpa":null,"qualPct":40.79,"signRate":9.21},{"state":"South Dakota","abbr":"SD","spend":0.0,"leads":7,"mql":2,"cases":0,"cpl":null,"cpmql":null,"cpa":null,"qualPct":28.57,"signRate":0.0},{"state":"Wisconsin","abbr":"WI","spend":0.0,"leads":28,"mql":9,"cases":3,"cpl":null,"cpmql":null,"cpa":null,"qualPct":32.14,"signRate":10.71},{"state":"Wyoming","abbr":"WY","spend":0.0,"leads":4,"mql":2,"cases":1,"cpl":null,"cpmql":null,"cpa":null,"qualPct":50.0,"signRate":25.0}];
+RAW.forEach(r=>r.qualClose = r.mql ? +(r.cases/r.mql*100).toFixed(2) : null);
+const fmtM=v=>v==null?"—":"$"+v.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:0});
+const fmtI=v=>v==null?"—":v.toLocaleString("en-US");
+const fmtP=v=>v==null||isNaN(v)?"—":v.toFixed(2)+"%";
+const CPA_TGT=1800;
+let sortKey="spend",sortDir=-1;
+function cpaClass(v){if(v==null)return"";if(v<=CPA_TGT)return"good";if(v<=CPA_TGT*1.5)return"warn";return"bad";}
 function render(){
-  const sorted = [...RAW].sort((a,b)=>{
-    const av = a[sortKey], bv = b[sortKey];
-    if(av==null && bv==null) return 0;
-    if(av==null) return 1;
-    if(bv==null) return -1;
-    if(typeof av === "string") return av.localeCompare(bv) * sortDir;
-    return (av-bv)*sortDir;
-  });
-  document.getElementById("tbody").innerHTML = sorted.map(r=>{
-    const sharePct = r.spend/totalSpend*100;
-    return `<tr>
-      <td class="state-cell">${r.state}</td>
-      <td class="r">${fmtMoney(r.spend)}</td>
-      <td class="bar-cell">
-        <div class="bar-wrap">
-          <span class="bar-val">${sharePct.toFixed(1)}%</span>
-          <div class="bar-bg"><div class="bar-fg" style="width:${sharePct.toFixed(1)}%"></div></div>
-        </div>
-      </td>
-      <td class="r">${fmtInt(r.leads)}</td>
-      <td class="r">${fmtMoney(r.cpl)}</td>
-      <td class="r">${fmtInt(r.cases)}</td>
-      <td class="r">${fmtPct(r.signRate)}</td>
-      <td class="r">${fmtMoney0(r.cpa)}</td>
-    </tr>`;
-  }).join("");
-
-  document.querySelectorAll("#stateTable th").forEach(th=>{
-    th.classList.toggle("sorted", th.dataset.sort===sortKey);
-    const arr = th.querySelector(".arrow");
-    if(arr) arr.textContent = th.dataset.sort===sortKey ? (sortDir<0 ? "▼" : "▲") : "▼";
-  });
+ const sorted=[...RAW].sort((a,b)=>{let av=a[sortKey],bv=b[sortKey];if(av==null&&bv==null)return 0;if(av==null)return 1;if(bv==null)return -1;if(typeof av==="string")return av.localeCompare(bv)*sortDir;return (av-bv)*sortDir;});
+ document.getElementById("tbody").innerHTML=sorted.map(r=>{
+  return `<tr><td class="state-cell">${r.state}</td>
+   <td class="r">${fmtM(r.spend)}</td>
+   <td class="r">${fmtI(r.leads)}</td>
+   <td class="r">${fmtM(r.cpl)}</td>
+   <td class="r">${fmtI(r.mql)}</td>
+   <td class="r">${fmtM(r.cpmql)}</td>
+   <td class="r">${fmtP(r.qualPct)}</td>
+   <td class="r">${fmtI(r.cases)}</td>
+   <td class="r ${cpaClass(r.cpa)}">${fmtM(r.cpa)}</td>
+   <td class="r">${fmtP(r.signRate)}</td>
+   <td class="r">${fmtP(r.qualClose)}</td></tr>`;
+ }).join("");
+ document.querySelectorAll("#stateTable th").forEach(th=>{th.classList.toggle("sorted",th.dataset.sort===sortKey);const a=th.querySelector(".arrow");if(a)a.textContent=th.dataset.sort===sortKey?(sortDir<0?"▼":"▲"):"▼";});
 }
-document.querySelectorAll("#stateTable th").forEach(th=>{
-  th.addEventListener("click", ()=>{
-    const k = th.dataset.sort;
-    if(!k) return;
-    if(sortKey===k) sortDir = -sortDir;
-    else { sortKey = k; sortDir = (k==="state") ? 1 : -1; }
-    render();
-  });
-});
+document.querySelectorAll("#stateTable th").forEach(th=>{th.addEventListener("click",()=>{const k=th.dataset.sort;if(!k)return;if(sortKey===k)sortDir=-sortDir;else{sortKey=k;sortDir=(k==="state")?1:-1;}render();});});
 render();
 </script>
 </body>
