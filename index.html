@@ -20,15 +20,17 @@ h1{font-size:28px;font-weight:700;color:#F8FAFC;margin-bottom:6px}
 .kpi-value{font-size:20px;font-weight:700;color:#F8FAFC;font-family:'JetBrains Mono',monospace}
 .kpi-sub{color:#64748B;font-size:11px;margin-top:4px;font-family:'JetBrains Mono',monospace}
 .panel{background:#0F1319;border:1px solid #1E293B;border-radius:10px;overflow:hidden}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:#151922;color:#94A3B8;font-weight:600;padding:11px 12px;text-align:left;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:2px solid #1E293B;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.table-wrap{overflow:auto;max-height:calc(100vh - 210px)}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+th{background:#151922;color:#94A3B8;font-weight:600;padding:11px 12px;text-align:left;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:2px solid #1E293B;font-size:11px;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;z-index:2}
 th:hover{color:#CBD5E1}
 th .arrow{font-size:9px;margin-left:3px;opacity:.3}
 th.sorted .arrow{opacity:1;color:#3B82F6}
 td{padding:10px 12px;border-bottom:1px solid #1E293B;white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:12px}
 tr:hover td{background:#1a1f2e}
-td.state-cell{font-family:'DM Sans',sans-serif;font-weight:500;color:#F1F5F9;font-size:13px}
+td.state-cell{font-family:'DM Sans',sans-serif;font-weight:500;color:#F1F5F9;font-size:13px;position:sticky;left:0;z-index:1;background:#0F1319}
+tr:hover td.state-cell{background:#1a1f2e}
+th:first-child{position:sticky;left:0;z-index:3}
 td.r,th.r{text-align:right}
 .bar-cell{min-width:150px;width:14%}
 .bar-cell .bar-wrap{display:flex;align-items:center;gap:10px}
